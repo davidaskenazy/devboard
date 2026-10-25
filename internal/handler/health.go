@@ -1,3 +1,4 @@
+// Package handler internal
 package handler
 
 import (
@@ -6,11 +7,11 @@ import (
 )
 
 // HealthHandler struct
-type HelthHandler struct{}
+type HealthHandler struct{}
 
 // NewHealthHandler constructor
-func NewHealthHandler() *HelthHandler {
-	return &HelthHandler{}
+func NewHealthHandler() *HealthHandler {
+	return &HealthHandler{}
 }
 
 // healthResponse struct
@@ -19,7 +20,7 @@ type healthResponse struct {
 	Version string `json:"version"`
 }
 
-func (handle *HelthHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (handle *HealthHandler) ServeHTTP(writer http.ResponseWriter, _ *http.Request) {
 	resp := healthResponse{
 		Status:  "ok",
 		Version: "1.0.0",

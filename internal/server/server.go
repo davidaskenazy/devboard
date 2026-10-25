@@ -86,6 +86,7 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 	server.mux.ServeHTTP(writer, request)
 }
 
+// Use middleware
 func (server *Server) Use(middleware func(http.Handler) http.Handler) {
 	server.httpServer.Handler = middleware(server.httpServer.Handler)
 }

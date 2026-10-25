@@ -24,12 +24,12 @@ func main() {
 
 	srv.RegisterRoutes("GET /health", healthHandler)
 
-	srv.RegisterRoutes("GET /panic", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv.RegisterRoutes("GET /panic", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 		panic("error provocado para probocar Recovery")
 	}))
 
 	if err := srv.Start(); err != nil {
-		logger.Error("error al iniciar el servidor", err)
+		logger.Error("error al iniciar el servidor", "error", err)
 		os.Exit(1)
 		//log.Fatalf("error al iniciar el servidor %v", err)
 	}
