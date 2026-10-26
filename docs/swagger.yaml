@@ -1,0 +1,31 @@
+basePath: /api/v1
+definitions:
+  internal_handler.healthResponse:
+    properties:
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: David Askenazy
+  description: API REST para gestion de proyectos
+  title: Devboard API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Verifica que el servidor esta corriendo y respondiendo
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.healthResponse'
+      summary: Health check
+      tags:
+      - system
+swagger: "2.0"
