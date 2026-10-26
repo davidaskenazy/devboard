@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// PaginationParams struct
 type PaginationParams struct {
 	Cursor string
 	Limit  int
@@ -15,7 +16,7 @@ const (
 	maxLimit     = 100
 )
 
-// Parse Pagination lee cursor y limit de la query string
+// ParsePagination lee cursor y limit de la query string
 func ParsePagination(request *http.Request) PaginationParams {
 	cursor := request.URL.Query().Get("cursor")
 	limit := defaultLimit
