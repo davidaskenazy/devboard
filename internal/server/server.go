@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/davidaskenazy/devboard/internal/middlewares"
 )
 
 // Server struct
@@ -95,4 +97,10 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 // Use middleware
 func (server *Server) Use(middleware func(http.Handler) http.Handler) {
 	server.httpServer.Handler = middleware(server.httpServer.Handler)
+}
+
+// Use Chain
+func (server *Server) UseChain(middlewaresParams ...middlewares.Middleware) {
+	server.httpServer.Handler = middlewares.Chain(server.httpServer.Handler, middlewaresParams...)
+
 }

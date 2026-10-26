@@ -2,6 +2,7 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -21,27 +22,49 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
+	//1. Configuracion del entorno
+	env := os.Getenv("GO_ENV")
 
-	logger := logger.New(logger.DefaultConfig())
+	//2. Logger
+	var log *slog.Logger
+	if env == "production" {
+		log = logger.New(logger.ProductionConfig())
+	} else {
+		log = logger.New(logger.DefaultConfig())
+	}
 
+	//3. Dependencias compartidas
+	/*
+		validate := validator.New()
+		notifier := notification.NewLogNotifier(log)
+		_ = notifier
+	*/
+	//4. Servidor con Functional options
 	srv := server.New(":8080",
-		server.WithLogger(logger),
+		server.WithLogger(log),
 		server.WithReadTimeout(15*time.Second),
+		server.WithWriteTimeout(30*time.Second),
 	)
 
-	srv.Use(middlewares.Recovery(logger))
-	srv.Use(middlewares.Logger(logger))
-
+	//5. Handlers
 	healthHandler := handler.NewHealthHandler()
 
+	//6.Registro de rutas
 	srv.RegisterRoutes("GET /docs/", httpSwagger.WrapHandler)
 	srv.RegisterRoutes("GET /health", healthHandler)
 	srv.RegisterRoutes("GET /panic", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 		panic("error provocado para probocar Recovery")
 	}))
 
+	//7. Middleware chain
+	srv.UseChain(
+		middlewares.Recovery(log),
+		middlewares.Logger(log),
+	)
+
+	//8. Arrancar shutdown limpio
 	if err := srv.Start(); err != nil {
-		logger.Error("error al iniciar el servidor", "error", err)
+		log.Error("error al iniciar el servidor", "error", err)
 		os.Exit(1)
 		//log.Fatalf("error al iniciar el servidor %v", err)
 	}
