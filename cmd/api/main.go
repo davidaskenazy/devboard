@@ -22,9 +22,9 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
-	//1. Configuracion del entorno
+	//1. Configuración  del entorno
 	env := os.Getenv("GO_ENV")
-
+	slog.Info("entorno cargado", "GO_ENV", env)
 	//2. Logger
 	var log *slog.Logger
 	if env == "production" {
@@ -33,7 +33,7 @@ func main() {
 		log = logger.New(logger.DefaultConfig())
 	}
 
-	//3. Dependencias compartidas
+	//3. Dependencies compartidas
 	/*
 		validate := validator.New()
 		notifier := notification.NewLogNotifier(log)
