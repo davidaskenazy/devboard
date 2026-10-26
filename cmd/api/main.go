@@ -4,6 +4,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/davidaskenazy/devboard/docs"
 	"github.com/davidaskenazy/devboard/internal/handler"
@@ -23,7 +24,10 @@ func main() {
 
 	logger := logger.New(logger.DefaultConfig())
 
-	srv := server.New(":8080", logger)
+	srv := server.New(":8080",
+		server.WithLogger(logger),
+		server.WithReadTimeout(15*time.Second),
+	)
 
 	srv.Use(middlewares.Recovery(logger))
 	srv.Use(middlewares.Logger(logger))
