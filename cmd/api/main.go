@@ -11,7 +11,10 @@ import (
 	"github.com/davidaskenazy/devboard/internal/handler"
 	"github.com/davidaskenazy/devboard/internal/logger"
 	"github.com/davidaskenazy/devboard/internal/middlewares"
+	"github.com/davidaskenazy/devboard/internal/repository/memory"
 	"github.com/davidaskenazy/devboard/internal/server"
+	"github.com/davidaskenazy/devboard/internal/usecase"
+	"github.com/davidaskenazy/devboard/internal/validator"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -22,39 +25,37 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
-	//1. Configuración  del entorno
-	env := os.Getenv("GO_ENV")
-	slog.Info("entorno cargado", "GO_ENV", env)
+
+	//1. Configuracion del entorno
 	//2. Logger
-	var log *slog.Logger
-	if env == "production" {
-		log = logger.New(logger.ProductionConfig())
-	} else {
-		log = logger.New(logger.DefaultConfig())
-	}
+	log := setupLogger()
 
 	//3. Dependencies compartidas
-	/*
-		validate := validator.New()
-		notifier := notification.NewLogNotifier(log)
-		_ = notifier
-	*/
-	//4. Servidor con Functional options
+	//Infrastructure: adapters
+	userRepo := memory.NewUserRepository()
+
+	//Use cases: logica del negocio
+	userUC := usecase.NewUserUseCase(userRepo)
+
+	//Validacion compartida
+	validate := validator.New()
+
+	//4. Handlers
+	healthHandler := handler.NewHealthHandler()
+	userHandler := handler.NewUserHandler(userUC, validate, log)
+
+	//5. Servidor con Functional options
 	srv := server.New(":8080",
 		server.WithLogger(log),
 		server.WithReadTimeout(15*time.Second),
 		server.WithWriteTimeout(30*time.Second),
 	)
 
-	//5. Handlers
-	healthHandler := handler.NewHealthHandler()
-
 	//6.Registro de rutas
 	srv.RegisterRoutes("GET /docs/", httpSwagger.WrapHandler)
 	srv.RegisterRoutes("GET /health", healthHandler)
-	srv.RegisterRoutes("GET /panic", http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
-		panic("error provocado para probocar Recovery")
-	}))
+	srv.RegisterRoutes("POST /api/v1/users", http.HandlerFunc(userHandler.Create))
+	srv.RegisterRoutes("GET / api/v1/users/{id}", http.HandlerFunc(userHandler.Get))
 
 	//7. Middleware chain
 	srv.UseChain(
@@ -68,4 +69,12 @@ func main() {
 		os.Exit(1)
 		//log.Fatalf("error al iniciar el servidor %v", err)
 	}
+}
+
+func setupLogger() *slog.Logger {
+	if os.Getenv("GO_ENV") == "production" {
+		return logger.New(logger.ProductionConfig())
+	}
+	return logger.New(logger.DefaultConfig())
+
 }
