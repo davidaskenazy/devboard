@@ -55,7 +55,7 @@ func main() {
 	srv.RegisterRoutes("GET /docs/", httpSwagger.WrapHandler)
 	srv.RegisterRoutes("GET /health", healthHandler)
 	srv.RegisterRoutes("POST /api/v1/users", http.HandlerFunc(userHandler.Create))
-	srv.RegisterRoutes("GET / api/v1/users/{id}", http.HandlerFunc(userHandler.Get))
+	srv.RegisterRoutes("GET /api/v1/users/{id}", http.HandlerFunc(userHandler.Get))
 
 	//7. Middleware chain
 	srv.UseChain(
