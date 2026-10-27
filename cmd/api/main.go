@@ -26,7 +26,7 @@ import (
 // @BasePath /api/v1
 func main() {
 
-	//1. Configuracion del entorno
+	//1. Configuration del entorno
 	//2. Logger
 	log := setupLogger()
 
