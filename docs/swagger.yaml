@@ -1,19 +1,12 @@
 basePath: /api/v1
 definitions:
-  github_com_davidaskenazy_devboard_internal_validator.ValidationError:
-    properties:
-      field:
-        type: string
-      message:
-        type: string
-    type: object
-  internal_handler.ProblemDetails:
+  handler.ProblemDetails:
     properties:
       detail:
         type: string
       errors:
         items:
-          $ref: '#/definitions/github_com_davidaskenazy_devboard_internal_validator.ValidationError'
+          $ref: '#/definitions/validator.ValidationError'
         type: array
       instance:
         type: string
@@ -24,7 +17,24 @@ definitions:
       type:
         type: string
     type: object
-  internal_handler.createUserRequest:
+  handler.createTaskRequest:
+    properties:
+      proyect_id:
+        type: string
+      title:
+        type: string
+    required:
+    - proyect_id
+    - title
+    type: object
+  handler.createTaskResponse:
+    properties:
+      proyect_id:
+        type: string
+      title:
+        type: string
+    type: object
+  handler.createUserRequest:
     properties:
       email:
         type: string
@@ -40,20 +50,27 @@ definitions:
     - name
     - password
     type: object
-  internal_handler.healthResponse:
+  handler.healthResponse:
     properties:
       status:
         type: string
       version:
         type: string
     type: object
-  internal_handler.userResponse:
+  handler.userResponse:
     properties:
       email:
         type: string
       id:
         type: string
       name:
+        type: string
+    type: object
+  validator.ValidationError:
+    properties:
+      field:
+        type: string
+      message:
         type: string
     type: object
 host: localhost:8080
@@ -73,10 +90,36 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_handler.healthResponse'
+            $ref: '#/definitions/handler.healthResponse'
       summary: Health check
       tags:
       - system
+  /tasks:
+    post:
+      consumes:
+      - application/json
+      description: Registra una nueva tarea en el sistema
+      parameters:
+      - description: Datos de la tarea
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.createTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ProblemDetails'
+      summary: Crear tarea
+      tags:
+      - tasks
   /users:
     post:
       consumes:
@@ -88,18 +131,18 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_handler.createUserRequest'
+          $ref: '#/definitions/handler.createUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/internal_handler.userResponse'
+            $ref: '#/definitions/handler.userResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_handler.ProblemDetails'
+            $ref: '#/definitions/handler.ProblemDetails'
       summary: Crear usuario
       tags:
       - users
@@ -118,11 +161,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_handler.userResponse'
+            $ref: '#/definitions/handler.userResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_handler.ProblemDetails'
+            $ref: '#/definitions/handler.ProblemDetails'
       summary: Obtener usuario
       tags:
       - users

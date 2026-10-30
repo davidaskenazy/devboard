@@ -31,7 +31,47 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.healthResponse"
+                            "$ref": "#/definitions/handler.healthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks": {
+            "post": {
+                "description": "Registra una nueva tarea en el sistema",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Crear tarea",
+                "parameters": [
+                    {
+                        "description": "Datos de la tarea",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.createTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handler.createTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ProblemDetails"
                         }
                     }
                 }
@@ -57,7 +97,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.createUserRequest"
+                            "$ref": "#/definitions/handler.createUserRequest"
                         }
                     }
                 ],
@@ -65,13 +105,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.userResponse"
+                            "$ref": "#/definitions/handler.userResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ProblemDetails"
+                            "$ref": "#/definitions/handler.ProblemDetails"
                         }
                     }
                 }
@@ -100,13 +140,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.userResponse"
+                            "$ref": "#/definitions/handler.userResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ProblemDetails"
+                            "$ref": "#/definitions/handler.ProblemDetails"
                         }
                     }
                 }
@@ -114,18 +154,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_davidaskenazy_devboard_internal_validator.ValidationError": {
-            "type": "object",
-            "properties": {
-                "field": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_handler.ProblemDetails": {
+        "handler.ProblemDetails": {
             "type": "object",
             "properties": {
                 "detail": {
@@ -134,7 +163,7 @@ const docTemplate = `{
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_davidaskenazy_devboard_internal_validator.ValidationError"
+                        "$ref": "#/definitions/validator.ValidationError"
                     }
                 },
                 "instance": {
@@ -151,7 +180,33 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.createUserRequest": {
+        "handler.createTaskRequest": {
+            "type": "object",
+            "required": [
+                "proyect_id",
+                "title"
+            ],
+            "properties": {
+                "proyect_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.createTaskResponse": {
+            "type": "object",
+            "properties": {
+                "proyect_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.createUserRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -173,7 +228,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.healthResponse": {
+        "handler.healthResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -184,7 +239,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handler.userResponse": {
+        "handler.userResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -194,6 +249,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "validator.ValidationError": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "message": {
                     "type": "string"
                 }
             }

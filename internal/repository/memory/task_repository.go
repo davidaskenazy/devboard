@@ -52,8 +52,8 @@ func (r *TaskRepository) GetByID(_ context.Context, id string) (*domain.Task, er
 	return task, nil
 }
 
-// ListByProyect metodo para listar tareas con base a un projectID
-func (r *TaskRepository) ListByProyect(_ context.Context, projectID string) ([]*domain.Task, error) {
+// ListByProject metodo para listar tareas con base a un projectID
+func (r *TaskRepository) ListByProject(_ context.Context, projectID string) ([]*domain.Task, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

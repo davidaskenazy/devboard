@@ -33,9 +33,11 @@ func main() {
 	//3. Dependencies compartidas
 	//Infrastructure: adapters
 	userRepo := memory.NewUserRepository()
+	taskRepo := memory.NewTaskRepository()
 
 	//Use cases: logica del negocio
 	userUC := usecase.NewUserUseCase(userRepo)
+	taskUC := usecase.NewTaskUseCase(taskRepo, taskRepo)
 
 	//Validacion compartida
 	validate := validator.New()
@@ -43,6 +45,7 @@ func main() {
 	//4. Handlers
 	healthHandler := handler.NewHealthHandler()
 	userHandler := handler.NewUserHandler(userUC, validate, log)
+	taskHandler := handler.NewTaskHandler(taskUC, validate, log)
 
 	//5. Servidor con Functional options
 	srv := server.New(":8080",
@@ -56,6 +59,7 @@ func main() {
 	srv.RegisterRoutes("GET /health", healthHandler)
 	srv.RegisterRoutes("POST /api/v1/users", http.HandlerFunc(userHandler.Create))
 	srv.RegisterRoutes("GET /api/v1/users/{id}", http.HandlerFunc(userHandler.Get))
+	srv.RegisterRoutes("POST /api/v1/tasks", http.HandlerFunc(taskHandler.Create))
 
 	//7. Middleware chain
 	srv.UseChain(

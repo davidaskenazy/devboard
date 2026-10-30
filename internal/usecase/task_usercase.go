@@ -25,7 +25,7 @@ type TaskUseCase struct {
 	queries  TaskQueryRepository
 }
 
-// TaskUseCase constructor
+// NewTaskUseCase constructor
 func NewTaskUseCase(commands TaskCommandRepository, queries TaskQueryRepository) *TaskUseCase {
 	return &TaskUseCase{
 		commands: commands,

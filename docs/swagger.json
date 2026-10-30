@@ -25,7 +25,47 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.healthResponse"
+                            "$ref": "#/definitions/handler.healthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks": {
+            "post": {
+                "description": "Registra una nueva tarea en el sistema",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Crear tarea",
+                "parameters": [
+                    {
+                        "description": "Datos de la tarea",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.createTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handler.createTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ProblemDetails"
                         }
                     }
                 }
@@ -51,7 +91,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.createUserRequest"
+                            "$ref": "#/definitions/handler.createUserRequest"
                         }
                     }
                 ],
@@ -59,13 +99,13 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.userResponse"
+                            "$ref": "#/definitions/handler.userResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ProblemDetails"
+                            "$ref": "#/definitions/handler.ProblemDetails"
                         }
                     }
                 }
@@ -94,13 +134,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.userResponse"
+                            "$ref": "#/definitions/handler.userResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.ProblemDetails"
+                            "$ref": "#/definitions/handler.ProblemDetails"
                         }
                     }
                 }
@@ -108,18 +148,7 @@
         }
     },
     "definitions": {
-        "github_com_davidaskenazy_devboard_internal_validator.ValidationError": {
-            "type": "object",
-            "properties": {
-                "field": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_handler.ProblemDetails": {
+        "handler.ProblemDetails": {
             "type": "object",
             "properties": {
                 "detail": {
@@ -128,7 +157,7 @@
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_davidaskenazy_devboard_internal_validator.ValidationError"
+                        "$ref": "#/definitions/validator.ValidationError"
                     }
                 },
                 "instance": {
@@ -145,7 +174,33 @@
                 }
             }
         },
-        "internal_handler.createUserRequest": {
+        "handler.createTaskRequest": {
+            "type": "object",
+            "required": [
+                "proyect_id",
+                "title"
+            ],
+            "properties": {
+                "proyect_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.createTaskResponse": {
+            "type": "object",
+            "properties": {
+                "proyect_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.createUserRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -167,7 +222,7 @@
                 }
             }
         },
-        "internal_handler.healthResponse": {
+        "handler.healthResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -178,7 +233,7 @@
                 }
             }
         },
-        "internal_handler.userResponse": {
+        "handler.userResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -188,6 +243,17 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "validator.ValidationError": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "message": {
                     "type": "string"
                 }
             }
