@@ -16,7 +16,7 @@ type TaskCommandRepository interface {
 // TaskQueryRepository interface CQRS
 type TaskQueryRepository interface {
 	GetByID(ctx context.Context, id string) (*domain.Task, error)
-	ListByProject(ctx context.Context, proyectID string) ([]*domain.Task, error)
+	ListByProject(ctx context.Context, projectID string) ([]*domain.Task, error)
 }
 
 // TaskUseCase struct usecase

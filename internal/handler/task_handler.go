@@ -34,20 +34,20 @@ func NewTaskHandler(uc *usecase.TaskUseCase, v *validator.Validator, logger *slo
 
 // createTaskRequest estructura
 type createTaskRequest struct {
-	ProyectID string `json:"proyect_id" validate:"required"`
+	ProjectID string `json:"project_id" validate:"required"`
 	Title     string `json:"title" validate:"required,min=3,max=200"`
 }
 
 // createTaskResponse estructura
 type createTaskResponse struct {
-	ProjectID string `json:"proyect_id"`
+	ProjectID string `json:"project_id"`
 	Title     string `json:"title"`
 }
 
 // taskResponse estructura
 type taskResponse struct {
 	ID          string            `json:"id"`
-	ProyectID   string            `json:"proyect_id"`
+	ProjectID   string            `json:"project_id"`
 	Title       string            `json:"title"`
 	Description string            `json:"desctiption,omitempty"`
 	Status      domain.TaskStatus `json:"status"`
@@ -61,7 +61,7 @@ type taskResponse struct {
 func toTaskResponse(t *domain.Task) taskResponse {
 	return taskResponse{
 		ID:          t.ID,
-		ProyectID:   t.ProyectID,
+		ProjectID:   t.ProjectID,
 		Title:       t.Title,
 		Description: t.Description,
 		Status:      t.Status,
@@ -103,13 +103,13 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := h.usercase.CreateTask(r.Context(), req.ProyectID, req.Title, "system")
+	task, err := h.usercase.CreateTask(r.Context(), req.ProjectID, req.Title, "system")
 	if err != nil {
 		RespondError(w, r, h.logger, err)
 		return
 	}
 	if err := RespondJSON(w, http.StatusCreated, createTaskResponse{
-		ProjectID: task.ProyectID,
+		ProjectID: task.ProjectID,
 		Title:     task.Title,
 	}); err != nil {
 		h.logger.ErrorContext(r.Context(),
@@ -194,6 +194,7 @@ func (h *TaskHandler) ListByProject(w http.ResponseWriter, r *http.Request) {
 // @Tags        tasks
 // @Accept json
 // @Produce     json
+// @Param id path string true "ID de la tarea"
 // @Param request body updateStatusRequest true "Nuevo estado"
 // @Success     200 {object} taskResponse
 // @Failure 400 {object} ProblemDetails

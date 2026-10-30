@@ -8,7 +8,7 @@ import (
 // Task representa una tarea dentro del tablero
 type Task struct {
 	ID          string
-	ProyectID   string
+	ProjectID   string
 	Title       string
 	Description string
 	Status      TaskStatus
@@ -19,10 +19,10 @@ type Task struct {
 }
 
 // NewTask construye una tarea nueva
-func NewTask(proyectID, title, createdBy string) *Task {
+func NewTask(projectID, title, createdBy string) *Task {
 	now := time.Now()
 	return &Task{
-		ProyectID: proyectID,
+		ProjectID: projectID,
 		Title:     title,
 		Status:    TaskStatusTodo,
 		CreatedBy: createdBy,

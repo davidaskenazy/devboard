@@ -147,6 +147,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/tasks/{id}/status": {
+            "put": {
+                "description": "Mueve una tarea a un nuevo estado del tablero",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Actualizar estado de tarea",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la tarea",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Nuevo estado",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.updateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.taskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "post": {
                 "description": "Registra un nuevo usuario en el sistema",
@@ -283,11 +330,11 @@ const docTemplate = `{
         "handler.createTaskRequest": {
             "type": "object",
             "required": [
-                "proyect_id",
+                "project_id",
                 "title"
             ],
             "properties": {
-                "proyect_id": {
+                "project_id": {
                     "type": "string"
                 },
                 "title": {
@@ -300,7 +347,7 @@ const docTemplate = `{
         "handler.createTaskResponse": {
             "type": "object",
             "properties": {
-                "proyect_id": {
+                "project_id": {
                     "type": "string"
                 },
                 "title": {
@@ -359,7 +406,7 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "proyect_id": {
+                "project_id": {
                     "type": "string"
                 },
                 "status": {
@@ -370,6 +417,17 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.updateStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/domain.TaskStatus"
                 }
             }
         },

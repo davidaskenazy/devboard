@@ -40,19 +40,19 @@ definitions:
     type: object
   handler.createTaskRequest:
     properties:
-      proyect_id:
+      project_id:
         type: string
       title:
         maxLength: 200
         minLength: 3
         type: string
     required:
-    - proyect_id
+    - project_id
     - title
     type: object
   handler.createTaskResponse:
     properties:
-      proyect_id:
+      project_id:
         type: string
       title:
         type: string
@@ -92,7 +92,7 @@ definitions:
         type: string
       id:
         type: string
-      proyect_id:
+      project_id:
         type: string
       status:
         $ref: '#/definitions/domain.TaskStatus'
@@ -100,6 +100,13 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  handler.updateStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/domain.TaskStatus'
+    required:
+    - status
     type: object
   handler.userResponse:
     properties:
@@ -208,6 +215,37 @@ paths:
           schema:
             $ref: '#/definitions/handler.ProblemDetails'
       summary: Obtener tarea por ID
+      tags:
+      - tasks
+  /tasks/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Mueve una tarea a un nuevo estado del tablero
+      parameters:
+      - description: ID de la tarea
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nuevo estado
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.taskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ProblemDetails'
+      summary: Actualizar estado de tarea
       tags:
       - tasks
   /users:

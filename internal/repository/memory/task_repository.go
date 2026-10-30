@@ -60,7 +60,7 @@ func (r *TaskRepository) ListByProject(_ context.Context, projectID string) ([]*
 	var result []*domain.Task
 
 	for _, t := range r.tasks {
-		if t.ProyectID == projectID {
+		if t.ProjectID == projectID {
 			result = append(result, t)
 		}
 	}
