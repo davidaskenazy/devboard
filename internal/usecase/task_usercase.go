@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/davidaskenazy/devboard/internal/domain"
 )
@@ -30,4 +31,37 @@ func NewTaskUseCase(commands TaskCommandRepository, queries TaskQueryRepository)
 		commands: commands,
 		queries:  queries,
 	}
+}
+
+// CreateTask metodo para crear tarea
+func (uc *TaskUseCase) CreateTask(ctx context.Context, projectID, title, createdBy string) (*domain.Task, error) {
+	task := domain.NewTask(projectID, title, createdBy)
+
+	if err := uc.commands.Create(ctx, task); err != nil {
+		return nil, fmt.Errorf("creando tarea: %w", err)
+	}
+	return task, nil
+}
+
+// ListProjectTasks metodo para crear tarea
+func (uc *TaskUseCase) ListProjectTasks(ctx context.Context, projectID string) ([]*domain.Task, error) {
+	return uc.queries.ListByProject(ctx, projectID)
+}
+
+// AssignTask metodo para asignar tarea
+func (uc *TaskUseCase) AssignTask(ctx context.Context, taskID, userID string) (*domain.Task, error) {
+	task, err := uc.queries.GetByID(ctx, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("obteniendo tarea %s: %w", taskID, err)
+	}
+
+	if err := task.AssignTo(userID); err != nil {
+		return nil, err
+	}
+
+	if err := uc.commands.Update(ctx, task); err != nil {
+		return nil, fmt.Errorf("actualizando tarea: %s", taskID)
+	}
+
+	return task, nil
 }
