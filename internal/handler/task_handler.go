@@ -18,6 +18,11 @@ type TaskHandler struct {
 	logger    *slog.Logger
 }
 
+// updateStatusRequest encapsula domain task status
+type updateStatusRequest struct {
+	Status domain.TaskStatus `json:"status" validate:"required"`
+}
+
 // NewTaskHandler constructor
 func NewTaskHandler(uc *usecase.TaskUseCase, v *validator.Validator, logger *slog.Logger) *TaskHandler {
 	return &TaskHandler{
@@ -180,5 +185,53 @@ func (h *TaskHandler) ListByProject(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Assign
-//UpdateStatus
+// Assign
+
+// UpdateStatus Actualizar estado de tarea
+//
+// @Summary     Actualizar estado de tarea
+// @Description Mueve una tarea a un nuevo estado del tablero
+// @Tags        tasks
+// @Accept json
+// @Produce     json
+// @Param request body updateStatusRequest true "Nuevo estado"
+// @Success     200 {object} taskResponse
+// @Failure 400 {object} ProblemDetails
+// @Router      /tasks/{id}/status [put]
+func (h *TaskHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	var req updateStatusRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespondError(w, r, h.logger, domain.ErrInvalidInput)
+		return
+	}
+
+	if errs := h.validator.Validate(req); errs != nil {
+		if err := RespondValidationError(w, errs); err != nil {
+			h.logger.ErrorContext(r.Context(),
+				"error al recibir respuesta de validacion",
+				"error", err,
+				"method", r.Method,
+				"path", r.URL.Path,
+			)
+		}
+		return
+	}
+
+	task, err := h.usercase.UpdateTaskStatus(r.Context(), id, req.Status)
+
+	if err != nil {
+		RespondError(w, r, h.logger, err)
+		return
+	}
+
+	if err := RespondJSON(w, http.StatusOK, toTaskResponse(task)); err != nil {
+		h.logger.ErrorContext(r.Context(),
+			"error al obtener respuesta JSON",
+			"error", err,
+			"method", r.Method,
+			"path", r.URL.Path)
+	}
+}
