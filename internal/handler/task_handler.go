@@ -144,6 +144,37 @@ func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//ListByProject
+// ListByProject
+func (h *TaskHandler) ListByProject(w http.ResponseWriter, r *http.Request) {
+	projectID := r.PathValue("id")
+	tasks, err := h.usercase.ListProjectTasks(r.Context(), projectID)
+
+	if err != nil {
+		RespondError(w, r, h.logger, err)
+		return
+	}
+
+	response := make([]taskResponse, len(tasks))
+	for i, t := range tasks {
+		response[i] = toTaskResponse(t)
+	}
+
+	RespondJSON(w, http.StatusOK, PaginatedResponse[taskResponse]{
+		Data:    response,
+		HasMore: false,
+	})
+
+	if err := RespondJSON(w, http.StatusOK, PaginatedResponse[taskResponse]{
+		Data:    response,
+		HasMore: false,
+	}); err != nil {
+		h.logger.ErrorContext(r.Context(),
+			"error al obtener respuesta JSON para obtener tareas",
+			"error", err,
+			"method", r.Method,
+			"path", r.URL.Path)
+	}
+}
+
 //Assign
 //UpdateStatus

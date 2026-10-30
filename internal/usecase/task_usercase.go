@@ -45,7 +45,14 @@ func (uc *TaskUseCase) CreateTask(ctx context.Context, projectID, title, created
 
 // ListProjectTasks metodo para crear tarea
 func (uc *TaskUseCase) ListProjectTasks(ctx context.Context, projectID string) ([]*domain.Task, error) {
-	return uc.queries.ListByProject(ctx, projectID)
+	tasks, err := uc.queries.ListByProject(ctx, projectID)
+
+	if err != nil {
+		return nil, fmt.Errorf("listando tareas del proyecto %s: %w", projectID, err)
+	}
+
+	return tasks, nil
+
 }
 
 // AssignTask metodo para asignar tarea
