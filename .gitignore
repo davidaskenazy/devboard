@@ -144,3 +144,6 @@ Makefile
 
 # SQLC generated files
 internal/repository/postgres/generated/
+
+#configuracion de db
+configs/config.yaml
