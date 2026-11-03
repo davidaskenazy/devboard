@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"github.com/davidaskenazy/devboard/internal/handler"
 	"github.com/davidaskenazy/devboard/internal/logger"
 	"github.com/davidaskenazy/devboard/internal/middlewares"
-	"github.com/davidaskenazy/devboard/internal/repository/memory"
+	pgrepo "github.com/davidaskenazy/devboard/internal/repository/postgres"
 	"github.com/davidaskenazy/devboard/internal/server"
 	"github.com/davidaskenazy/devboard/internal/usecase"
 	"github.com/davidaskenazy/devboard/internal/validator"
@@ -30,10 +31,30 @@ func main() {
 	//2. Logger
 	log := setupLogger()
 
+	dbURL := os.Getenv("DATABASE_URL")
+
+	//Crear pool de conexiones
+	pool, err := pgrepo.NewPool(context.Background(), pgrepo.Config{
+		URL:             dbURL,
+		MaxConns:        25,
+		MinConns:        5,
+		MaxConnLifetime: 1 * time.Hour,
+		MaxConnIdleTime: 30 * time.Minute,
+	})
+
+	if err != nil {
+		log.Error("no se pudo conectar a la base de datos", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	defer pool.Close()
+
+	log.Info("conexion a base de datos establecida")
+
 	//3. Dependencies compartidas
 	//Infrastructure: adapters
-	userRepo := memory.NewUserRepository()
-	taskRepo := memory.NewTaskRepository()
+	userRepo := pgrepo.NewUserRepository(pool)
+	taskRepo := pgrepo.NewTaskRepository(pool)
 
 	//Use cases: logica del negocio
 	userUC := usecase.NewUserUseCase(userRepo)
