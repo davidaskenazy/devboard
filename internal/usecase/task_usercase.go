@@ -56,7 +56,11 @@ func (uc *TaskUseCase) ListProjectTasks(ctx context.Context, projectID string) (
 }
 
 // AssignTask metodo para asignar tarea
-func (uc *TaskUseCase) AssignTask(ctx context.Context, taskID, userID string) (*domain.Task, error) {
+func (uc *TaskUseCase) AssignTask(
+	ctx context.Context,
+	taskID, userID string,
+) (*domain.Task, error) {
+
 	task, err := uc.queries.GetByID(ctx, taskID)
 	if err != nil {
 		return nil, fmt.Errorf("obteniendo tarea %s: %w", taskID, err)
@@ -67,7 +71,7 @@ func (uc *TaskUseCase) AssignTask(ctx context.Context, taskID, userID string) (*
 	}
 
 	if err := uc.commands.Update(ctx, task); err != nil {
-		return nil, fmt.Errorf("actualizando tarea: %s", taskID)
+		return nil, fmt.Errorf("actualizando tarea %s: %w", taskID, err)
 	}
 
 	return task, nil

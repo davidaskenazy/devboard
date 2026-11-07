@@ -68,7 +68,7 @@ func (r *TaskRepository) Update(ctx context.Context, task *domain.Task) error {
 	var assigneeID pgtype.UUID
 
 	if task.AssigneeID != nil {
-		if err := assigneeID.Scan(task.AssigneeID); err != nil {
+		if err := assigneeID.Scan(*task.AssigneeID); err != nil {
 			return fmt.Errorf("assignee_id invalido: %w", domain.ErrInvalidInput)
 		}
 	}
@@ -110,7 +110,7 @@ func (r *TaskRepository) GetByID(ctx context.Context, id string) (*domain.Task, 
 	return toDomainTask(result), nil
 }
 
-// ListByProject
+// ListByProject listado de proyectos
 func (r *TaskRepository) ListByProject(ctx context.Context, projectID string) ([]*domain.Task, error) {
 	var pgProjectID pgtype.UUID
 

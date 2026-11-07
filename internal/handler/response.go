@@ -56,7 +56,7 @@ func RespondError(writer http.ResponseWriter, request *http.Request, logger *slo
 		problem.Detail = err.Error()
 	case errors.Is(err, domain.ErrInvalidInput):
 		problem.Type = problemBaseURL + "/bad-request"
-		problem.Title = "Recurso prohibido"
+		problem.Title = "Solicitud no valida"
 		problem.Status = http.StatusBadRequest
 		problem.Detail = err.Error()
 	default:

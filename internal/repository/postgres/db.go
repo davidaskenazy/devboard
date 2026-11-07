@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Config contiene la configuracion de la conexion de la DB
+// Config contiene la configuration de la conexion de la DB
 type Config struct {
 	URL             string
 	MaxConns        int32
