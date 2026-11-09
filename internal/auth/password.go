@@ -112,7 +112,7 @@ func parseHash(encodedHash string) (*argon2Params, []byte, []byte, error) {
 	}
 
 	params := &argon2Params{}
-	if _, err := fmt.Scanf(parts[3], "m=%d,t=%d,p=%d", &params.memory, &params.iterations, &params.parallelims); err != nil {
+	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &params.memory, &params.iterations, &params.parallelims); err != nil {
 		return nil, nil, nil, ErrInvalidPasswordHash
 	}
 

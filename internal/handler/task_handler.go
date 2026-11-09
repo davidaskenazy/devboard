@@ -83,6 +83,7 @@ func toTaskResponse(t *domain.Task) taskResponse {
 // @Param request body createTaskRequest true "Datos de la tarea"
 // @Success     201 {object} taskResponse
 // @Failure 400 {object} ProblemDetails
+// @Security BearerAuth
 // @Router      /tasks [post]
 func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req createTaskRequest
@@ -135,6 +136,7 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "ID de la tarea"
 // @Success     200 {object} taskResponse
 // @Failure 404 {object} ProblemDetails
+// @Security BearerAuth
 // @Router      /tasks/{id} [get]
 func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
@@ -163,6 +165,7 @@ func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "ID de la del proyecto"
 // @Success     200 {object} PaginatedResponse[taskResponse]
 // @Failure 404 {object} ProblemDetails
+// @Security BearerAuth
 // @Router      /projects/{id}/tasks [get]
 func (h *TaskHandler) ListByProject(w http.ResponseWriter, r *http.Request) {
 	projectID := r.PathValue("id")
@@ -201,6 +204,7 @@ func (h *TaskHandler) ListByProject(w http.ResponseWriter, r *http.Request) {
 // @Param request body updateStatusRequest true "Nuevo estado"
 // @Success     200 {object} taskResponse
 // @Failure 400 {object} ProblemDetails
+// @Security BearerAuth
 // @Router      /tasks/{id}/status [put]
 func (h *TaskHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
@@ -251,6 +255,7 @@ func (h *TaskHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 // @Param request body assignTaskRequest true "ID del asignado"
 // @Success     200 {object} taskResponse
 // @Failure 400 {object} ProblemDetails
+// @Security BearerAuth
 // @Router      /tasks/{id}/assign [put]
 func (h *TaskHandler) Assign(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")

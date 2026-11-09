@@ -30,7 +30,7 @@ func refreshKey(tokenID string) string {
 
 // revokedKey contruye la clave Redis para un token revocado
 func revokedKey(tokenID string) string {
-	return "refresh:" + tokenID
+	return "revoked:" + tokenID
 }
 
 // StoreRefreshToken guarda un refresh token en Redis
