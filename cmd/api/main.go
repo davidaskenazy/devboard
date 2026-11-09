@@ -9,6 +9,7 @@ import (
 	"time"
 
 	_ "github.com/davidaskenazy/devboard/docs"
+	"github.com/davidaskenazy/devboard/internal/auth"
 	"github.com/davidaskenazy/devboard/internal/cache"
 	"github.com/davidaskenazy/devboard/internal/handler"
 	"github.com/davidaskenazy/devboard/internal/logger"
@@ -74,6 +75,23 @@ func main() {
 
 	log.Info("conexion a Redis establecida")
 
+	// Auth Infrastructure
+	jwtSecret := os.Getenv("JWT_SECRET")
+	refreshTokenDuration := 7 * 24 * time.Hour
+
+	jwtManager, err := auth.NewJWTManager(auth.JWTConfig{
+		SecretKey:            []byte(jwtSecret),
+		AccessTokenDuration:  15 * time.Minute,
+		RefreshTokenDuration: refreshTokenDuration,
+	})
+
+	if err != nil {
+		log.Error("error configurando JWT", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	tokenStore := auth.NewTokenStore(redisClient)
+
 	//3. Dependencies compartidas
 	//Infrastructure: adapters
 	userRepo := pgrepo.NewUserRepository(pool)
@@ -82,6 +100,7 @@ func main() {
 	//Use cases: logica del negocio
 	userUC := usecase.NewUserUseCase(userRepo)
 	taskUC := usecase.NewTaskUseCase(taskRepo, taskRepo)
+	authUC := usecase.NewAuthUseCase(userRepo, jwtManager, tokenStore, refreshTokenDuration)
 
 	//Validacion compartida
 	validate := validator.New()
@@ -90,6 +109,7 @@ func main() {
 	healthHandler := handler.NewHealthHandler()
 	userHandler := handler.NewUserHandler(userUC, validate, log)
 	taskHandler := handler.NewTaskHandler(taskUC, validate, log)
+	authHandler := handler.NewAuthHandler(authUC, validate, log)
 
 	//5. Servidor con Functional options
 	srv := server.New(":8080",
@@ -98,17 +118,25 @@ func main() {
 		server.WithWriteTimeout(30*time.Second),
 	)
 
-	//6.Registro de rutas
+	// Middleware Auth
+	authMW := middlewares.RequireAuth(jwtManager, log)
+
+	//6.Registro de rutas publicas
 	srv.RegisterRoutes("GET /docs/", httpSwagger.WrapHandler)
 	srv.RegisterRoutes("GET /health", healthHandler)
+	srv.RegisterRoutes("POST /api/v1/auth/register", http.HandlerFunc(authHandler.Register))
+	srv.RegisterRoutes("POST /api/v1/auth/login", http.HandlerFunc(authHandler.Login))
+	srv.RegisterRoutes("POST /api/v1/auth/refresh", http.HandlerFunc(authHandler.Refresh))
+	srv.RegisterRoutes("POST /api/v1/auth/logout", http.HandlerFunc(authHandler.Logout))
 	srv.RegisterRoutes("POST /api/v1/users", http.HandlerFunc(userHandler.Create))
 	srv.RegisterRoutes("GET /api/v1/users/{id}", http.HandlerFunc(userHandler.Get))
-	srv.RegisterRoutes("POST /api/v1/tasks", http.HandlerFunc(taskHandler.Create))
-	srv.RegisterRoutes("GET /api/v1/tasks/{id}", http.HandlerFunc(taskHandler.Get))
-	srv.RegisterRoutes("PUT /api/v1/tasks/{id}/status", http.HandlerFunc(taskHandler.UpdateStatus))
-	srv.RegisterRoutes("PUT /api/v1/tasks/{id}/assign", http.HandlerFunc(taskHandler.Assign))
 
-	srv.RegisterRoutes("GET /api/v1/projects/{id}/tasks", http.HandlerFunc(taskHandler.ListByProject))
+	//6.Registro de rutas protegidas
+	srv.RegisterRoutes("POST /api/v1/tasks", middlewares.Chain(http.HandlerFunc(taskHandler.Create), authMW))
+	srv.RegisterRoutes("GET /api/v1/tasks/{id}", middlewares.Chain(http.HandlerFunc(taskHandler.Get)))
+	srv.RegisterRoutes("PUT /api/v1/tasks/{id}/status", middlewares.Chain(http.HandlerFunc(taskHandler.UpdateStatus)))
+	srv.RegisterRoutes("PUT /api/v1/tasks/{id}/assign", middlewares.Chain(http.HandlerFunc(taskHandler.Assign)))
+	srv.RegisterRoutes("GET /api/v1/projects/{id}/tasks", middlewares.Chain(http.HandlerFunc(taskHandler.ListByProject)))
 
 	//GET /api/v1/tasks/{id}
 	//GET /api/v1/projects/{id}/tasks
@@ -119,6 +147,12 @@ func main() {
 	srv.UseChain(
 		middlewares.Recovery(log),
 		middlewares.Logger(log),
+		middlewares.SecurityHeaders(middlewares.SecurityConfig{
+			AllowedOrigins: []string{
+				"http://localhost:3000",
+				"http://localhost://5173",
+			},
+		}),
 	)
 
 	//8. Arrancar shutdown limpio

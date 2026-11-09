@@ -10,6 +10,7 @@ import (
 	"github.com/davidaskenazy/devboard/internal/validator"
 )
 
+// AuthHandler struct
 type AuthHandler struct {
 	usecase   *usecase.AuthUseCase
 	validator *validator.Validator

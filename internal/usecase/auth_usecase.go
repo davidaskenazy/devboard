@@ -24,6 +24,7 @@ type AuthTokens struct {
 	ExpiresIn    time.Duration
 }
 
+// AuthUseCase caso de uso de auth
 type AuthUseCase struct {
 	userRepo             authUserRepository
 	jwtManager           *auth.JWTManager
@@ -46,7 +47,7 @@ func NewAuthUseCase(
 	}
 }
 
-// Register
+// Register genera un registro en la app
 func (uc *AuthUseCase) Register(ctx context.Context, email, name, password string) (*AuthTokens, error) {
 	passwordHash, err := auth.HashPassword(password)
 
@@ -168,7 +169,6 @@ func (uc *AuthUseCase) RefreshTokens(ctx context.Context, refreshToken string) (
 }
 
 // Logout revoca el refresh token del usuario
-
 func (uc *AuthUseCase) Logout(ctx context.Context, refreshToken string) error {
 	claims, err := uc.jwtManager.VerifyToken(refreshToken)
 
